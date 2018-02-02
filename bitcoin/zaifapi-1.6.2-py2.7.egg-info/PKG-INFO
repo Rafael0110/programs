@@ -1,0 +1,15 @@
+Metadata-Version: 1.1
+Name: zaifapi
+Version: 1.6.2
+Summary: Zaif Api Library
+Home-page: https://github.com/techbureau/zaifapi
+Author: AkiraTaniguchi, DaikiShiroi
+Author-email: dededededaiou2003@yahoo.co.jp
+License: MIT
+Description: https://pypi.python.org/pypi/zaifapi
+Keywords: zaif bit coin btc xem mona jpy virtual currency block chain
+Platform: UNKNOWN
+Classifier: Development Status :: 1 - Planning
+Classifier: Programming Language :: Python
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
