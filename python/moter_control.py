@@ -3,6 +3,7 @@ import picamera
 import RPi.GPIO as GPIO
 import signal
 import sys 
+from getch import getch, pause
 from datetime import datetime
 from PIL import Image
 
@@ -25,46 +26,78 @@ class moter_control:
 		self.servoH.start(0.0)
 		self.radH = -20.0
 
+		self.mv(0,0,1)
+
 	def __del__(self):
+		self.mv(-10.0,-20.0,0)
 		self.servoW.stop()
 		self.servoH.stop()
 		GPIO.cleanup()
 
 	def mv(self,w,h,option):
+
+		print "mv",str(self.radW),w
+		print "mv",str(self.radH),h
+
 		if option :
-			tempW = w / 50.0
-			tempH = h / 50.0
-			print("mv",self.radW,w)
-			print("mv",self.radh,h)
+			tempW = w / 5.0
+			tempH = h / 5.0
+			self.radW += w
+			self.radH += h
 		else :
-			tempW = (w - self.radW) / 50.0
-			tempH = (h - self.radH) / 50.0
-			print("mv",self.radW,"to",w)
-			print("mv",self.radh,"to",h)
+			tempW = (w - self.radW) / 5.0
+			tempH = (h - self.radH) / 5.0
+			self.radW = w
+			self.radH = h
 
-		for i in range(1,50) :
-			self.servoW.ChangeDutyCycle(rad(self.radW+tempW*i))
-			self.servoH.ChangeDutyCycle(rad(self.radH+tempH*i))
-			time.sleep(0.02)
+		self.servoW.ChangeDutyCycle(rad(self.radW))
+		self.servoH.ChangeDutyCycle(rad(self.radH))
 
-		self.servoW.ChangeDutyCycle(rad(w))
-		self.servoH.ChangeDutyCycle(rad(h))
-		time.sleep(0.02)
-		self.radW = w
-		self.radH = h
+		time.sleep(0.5)
 
 	def photo(self):
 		with picamera.PiCamera() as camera:
 			camera.led = False
-			pictName = 'pict'+datetime.now().strftime('%m%d%H%M')+'.jpg'
+			pictName = 'pict'+datetime.now().strftime('%m%d%H%M%S')+'.jpg'
 			camera.resolution = (1024,768)
 			camera.capture(pictName)
 			time.sleep(1)
 			im = Image.open(pictName)
 			im.rotate(180).save(pictName)
 
+	def moter_moove(self):
+		while True:
+		  key = ord(getch())
+
+		  if key == 13: # Enter
+		  	self.photo()
+		  	print "Photo!"
+		  	pass
+
+		  if key == 27: # ESC
+		    key = ord(getch())
+
+		    if key == 91: # Arrow keys
+		      key = ord(getch())
+		      if key == 66:
+		        print "Down Arrow"
+		        self.mv(0,5.0,1)
+		      elif key == 65:
+		        print "Up Arrow"
+		        self.mv(0,-5.0,1)
+		      elif key == 68:
+		        print "Left Arrow"
+		        self.mv(5.0,0,1)
+		      elif key == 67:
+		        print "Right Arrow"
+		        self.mv(-5.0,0,1)
+
+		    elif key == 27: # ESC
+		      print "ESC : exit."
+		      break
+		self.__del__()
+		pause()
+
 if __name__ == '__main__':
 	moter = moter_control(21,20)
-	for i in range(8) :
-		moter.mv(i*10,i*10,0)
-	moter.mv(-10,-20,0)
+	moter.moter_moove()
